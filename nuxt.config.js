@@ -61,7 +61,8 @@ module.exports = {
 
 	plugins: [
 		{ src: '@/plugins/handsontable.js', mode: 'client' },
-    '@/plugins/components.js',
+		{ src: '@/plugins/okta.js', mode: 'client' },
+		'@/plugins/components.js',
 		'@/plugins/numeral.js',
 		'@/plugins/fuse.js',
 		'@/plugins/varCheck.js'
