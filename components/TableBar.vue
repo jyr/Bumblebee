@@ -753,7 +753,7 @@ export default {
 				{command: 'remove_special_chars', text: 'Remove special chars', type: 'STRING'},
         {command: 'trim', text: 'Trim white space', type: 'STRING'},
         {command: 'string clustering', text: 'String clustering', type: 'STRING', max: 1, min: 1},
-        // {command: 'outliers', text: 'OUTLIERS', type: 'STRING', max: 1},
+        {command: 'outliers', text: 'OUTLIERS', type: 'STRING', max: 1},
 
 				{command: 'bucketizer',       text: 'Create Bins',          type: 'PREPARE', max: 1}, // TODO: Remove limit
 				{command: 'impute',           text: 'Impute rows',          type: 'IMPUTE'},

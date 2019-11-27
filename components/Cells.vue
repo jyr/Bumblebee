@@ -74,14 +74,42 @@
                     </v-combobox>
                   </template>
                   <template v-if="field.type=='outliers-info'">
-                    <div :key="field.key">
-                      <OutliersBar
-                        :lower_bound_count="currentCommand.data.lower_bound_count"
-                        :upper_bound_count="currentCommand.data.upper_bound_count"
-                        :count_non_outliers="currentCommand.data.count_non_outliers"
-                      />
+                    <v-row class="no-gutters" :key="field.key">
+                      <v-col>
+                        <Histogram
+                          v-if="currentCommand.data.hist_data.lower_bound"
+                          :total="currentCommand.data.lower_bound_count"
+                          :values="currentCommand.data.hist_data.lower_bound[currentCommand.columns[0]].hist"
+                          barColor="error"
+                          :selection.sync="currentCommand.data.lower_selection"
+                          selectable
+                          title="Lower bound"
+                        />
+                      </v-col>
+                      <v-col>
+                        <Histogram
+                          v-if="currentCommand.data.hist_data.non_outlier_hist"
+                          :total="currentCommand.data.count_non_outliers"
+                          :values="currentCommand.data.hist_data.non_outlier_hist[currentCommand.columns[0]].hist"
+                          barColor="success"
+                          :selection.sync="currentCommand.data.non_outliers_selection"
+                          selectable
+                          title="Non outliers"
+                        />
+                      </v-col>
+                      <v-col>
+                        <Histogram
+                          v-if="currentCommand.data.hist_data.upper_bound"
+                          :total="currentCommand.data.upper_bound_count"
+                          :values="currentCommand.data.hist_data.upper_bound[currentCommand.columns[0]].hist"
+                          barColor="error"
+                          :selection.sync="currentCommand.data.upper_selection"
+                          selectable
+                          title="Upper bound"
+                        />
+                      </v-col>
                       {{currentCommand}}
-                    </div>
+                    </v-row>
                   </template>
                   <template v-if="field.type=='switch'">
                     <v-switch
@@ -301,7 +329,7 @@
 import axios from 'axios'
 import CodeEditor from '@/components/CodeEditor'
 import OutputColumnInputs from '@/components/OutputColumnInputs'
-import OutliersBar from '@/components/OutliersBar'
+import Histogram from '@/components/Histogram'
 import clientMixin from '@/plugins/mixins/client'
 import { trimCharacters, debounce, newName, arrayJoin } from '@/utils/functions.js'
 
@@ -315,7 +343,7 @@ export default {
   components: {
     CodeEditor,
 		OutputColumnInputs,
-		OutliersBar
+		Histogram
   },
 
   mixins: [clientMixin],
@@ -929,14 +957,20 @@ export default {
               var lower_data = JSON.parse(trimCharacters(lower_response.content, "'"))
               var hist_data = JSON.parse(trimCharacters(hist_response.content, "'"))
 
+
               outliers_data = { ...outliers_data, upper_data, lower_data, hist_data }
+
 
               console.log('outliers_data',outliers_data)
 
               this.currentCommand = {
                 ...this.currentCommand,
-                data: outliers_data
+                data: outliers_data,
+                upper_selection: [],
+                non_outliers_selection: [],
+                lower_selection: [],
               }
+
 
             }
             catch (error) {
