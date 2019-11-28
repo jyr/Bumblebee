@@ -74,42 +74,14 @@
                     </v-combobox>
                   </template>
                   <template v-if="field.type=='outliers-info'">
-                    <v-row class="no-gutters" :key="field.key">
-                      <v-col>
-                        <Histogram
-                          v-if="currentCommand.data.hist_data.lower_bound"
-                          :total="currentCommand.data.lower_bound_count"
-                          :values="currentCommand.data.hist_data.lower_bound[currentCommand.columns[0]].hist"
-                          barColor="error"
-                          :selection.sync="currentCommand.data.lower_selection"
-                          selectable
-                          title="Lower bound"
-                        />
-                      </v-col>
-                      <v-col>
-                        <Histogram
-                          v-if="currentCommand.data.hist_data.non_outlier_hist"
-                          :total="currentCommand.data.count_non_outliers"
-                          :values="currentCommand.data.hist_data.non_outlier_hist[currentCommand.columns[0]].hist"
-                          barColor="success"
-                          :selection.sync="currentCommand.data.non_outliers_selection"
-                          selectable
-                          title="Non outliers"
-                        />
-                      </v-col>
-                      <v-col>
-                        <Histogram
-                          v-if="currentCommand.data.hist_data.upper_bound"
-                          :total="currentCommand.data.upper_bound_count"
-                          :values="currentCommand.data.hist_data.upper_bound[currentCommand.columns[0]].hist"
-                          barColor="error"
-                          :selection.sync="currentCommand.data.upper_selection"
-                          selectable
-                          title="Upper bound"
-                        />
-                      </v-col>
-                      {{currentCommand}}
-                    </v-row>
+                    <div :key="field.key">
+                      <Outliers
+                        v-if="currentCommand.data"
+                        :data="currentCommand.data"
+                        :columnName="currentCommand.columns[0]"
+                        :selection.sync="currentCommand.selection"
+                      />
+                    </div>
                   </template>
                   <template v-if="field.type=='switch'">
                     <v-switch
@@ -329,7 +301,7 @@
 import axios from 'axios'
 import CodeEditor from '@/components/CodeEditor'
 import OutputColumnInputs from '@/components/OutputColumnInputs'
-import Histogram from '@/components/Histogram'
+import Outliers from '@/components/Outliers'
 import clientMixin from '@/plugins/mixins/client'
 import { trimCharacters, debounce, newName, arrayJoin } from '@/utils/functions.js'
 
@@ -343,7 +315,7 @@ export default {
   components: {
     CodeEditor,
 		OutputColumnInputs,
-		Histogram
+		Outliers
   },
 
   mixins: [clientMixin],
@@ -960,15 +932,12 @@ export default {
 
               outliers_data = { ...outliers_data, upper_data, lower_data, hist_data }
 
-
               console.log('outliers_data',outliers_data)
 
               this.currentCommand = {
                 ...this.currentCommand,
                 data: outliers_data,
-                upper_selection: [],
-                non_outliers_selection: [],
-                lower_selection: [],
+                selection: [],
               }
 
 
@@ -981,7 +950,7 @@ export default {
                 _error = error.content.ename
               if (error.content && error.content.evalue)
                 _error += ': '+error.content.evalue
-              this.currentCommand = {...this.currentCommand, error: _error}
+              this.currentCommand = {...this.currentCommand, error: _error, data: false, selection: []}
             }
 
             this.currentCommand.loading = false
@@ -992,6 +961,7 @@ export default {
               algorithm: 'tukey',
               threshold: 1,
               data: false,
+              selection: [],
               remove: false,
               loading: true
             }
